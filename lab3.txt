@@ -1,0 +1,66 @@
+import pandas as pd
+import math
+df=pd.read_csv('dataset.csv')
+print("\n Dataset:\n",df)
+t=df.keys()[-1]
+print("Target attribute is:",t)
+attnames=list(df.keys())
+attnames.remove(t)
+print("Predicting attributes:",attnames)
+def entropy(probs):
+    return sum([-prob*math.log(prob,2)for prob in probs])
+def entropylist(ls,value):
+    from collections import Counter
+    cnt=Counter(x for x in ls)
+    print("Target attribute class count(Yes/No)=",dict(cnt))
+    total_inst=len(ls)
+    print("Total instances/records associated with {0} is:{1}".format(value,total_inst))
+    probs=[x/total_inst for x in cnt.values()]
+    return entropy(probs)
+def info_gain(df,splitatt,targetatt,battr):
+    print("\n\n----Information gain calculation of",splitatt,"----\n")
+    dfsplit=df.groupby(splitatt)
+    glist=[]
+    for game,group in dfsplit:
+        print("Group attribute values\n",group)
+        glist.append(game)
+    obs=len(df.index)
+    dfagg1=dfsplit.agg({targetatt:lambda x:entropylist(x,glist.pop())})
+    dfagg2=dfsplit.agg({targetatt:lambda x:len(x)/obs})
+    dfagg1.columns=['Entropy']
+    dfagg2.columns=['Proportion']
+    newentropy=sum(dfagg1['Entropy']*dfagg2['Proportion'])
+    if battr!='S':
+        oldentropy=entropylist(df[targetatt],'S-'+df.iloc[0][df.columns.get_loc(battr)])
+    else:
+        oldentropy=entropylist(df[targetatt],battr)
+    return oldentropy-newentropy
+def id3(df,targetatt,attnames,defaultclass=None,defaultattr='S'):
+    from collections import Counter
+    cnt=Counter(x for x in df[targetatt])
+    if len(cnt)==1:
+        return next(iter(cnt))
+    elif df.empty or (not attnames):
+        return defaultclass
+    else:
+        defaultclass=max(cnt.keys())
+        gainz=[]
+        for attr in attnames:
+            ig=info_gain(df,attr,targetatt,defaultattr)
+            gainz.append(ig)
+            print("Info gain of",attr,"is:",ig)
+        indexmax=gainz.index(max(gainz))
+        bestattr=attnames[indexmax]
+        print("\n Attribute with max gain  is:",bestattr)
+        tree={bestattr:{}}
+        remaining_names=[i for i in attnames if i!=bestattr]
+        for attrval,datasubset in df.groupby(bestattr):
+            subtree=id3(datasubset,targetatt,remaining_names,defaultclass,bestattr)
+            tree[bestattr][attrval]=subtree
+        return tree
+from pprint import pprint
+tree=id3(df,t,attnames)
+print("\n\n The resultant tree is:")
+pprint(tree)
+    
+        

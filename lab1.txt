@@ -1,0 +1,29 @@
+import csv
+with open('labb1.csv','r') as f:
+    reader = csv.reader(f)
+    data = list(reader) 
+
+print("Training data\n")
+for row in data:
+    print (row)
+attr_len=len(data[0])-1
+h=['0']*attr_len 
+print("h=",h)
+k=0
+print("\nThe Hypothesis are\n")
+for row in data:
+    if row[-1] =='yes': #For each positive training stance x
+        j=0
+        for col in row: #For each attribute constraint a, in h
+            if col != 'yes':
+                if col != h[j] and h[j] =='0':
+                    h[j] = col
+                elif col != h[j] and h[j] !='0':
+                    h[j]='?'
+          
+            j=j+1
+          
+    print("h",k,"=",h) 
+    k=k+1
+
+print('\nMaxisally Specific Hypothesis: \n',"h",k-1,"=", h) 

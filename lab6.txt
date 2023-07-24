@@ -1,0 +1,53 @@
+import pandas as pd
+msg = pd.read_csv('naive.csv', names=['message','label'])
+print('Total instance in the dataset: ',msg.shape[0])
+msg['labelnum'] = msg.label.map({'pos':1,'neg':0})
+print("Dataset")
+print(msg)
+X = msg.message
+Y = msg.labelnum
+
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest = train_test_split(X,Y)
+print('\n Dataset is split into Training and Testing')
+print('\n Total training instances= ', ytrain.shape[0])
+print('\n Total testing instances= ', ytest.shape[0])
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+count_vect = CountVectorizer()
+xtrain_dtm = count_vect.fit_transform(xtrain)
+xtest_dtm = count_vect.transform(xtest)
+print('\n Total features extracted using Count Vectorizer: ',xtrain_dtm.shape[1])
+
+print('\n The words or token in the text documents\n')
+
+print(count_vect.get_feature_names())
+print('\n')
+
+
+from sklearn.naive_bayes import MultinomialNB
+
+clf= MultinomialNB().fit(xtrain_dtm,ytrain)
+
+predicted = clf.predict(xtest_dtm)
+
+print('Predicted')
+print('-------------------------')
+print(predicted)
+print('\n')
+print('Actual')
+print('-------------------------')
+print(list(ytest))
+
+from sklearn import metrics
+
+print("\nAccuracy Metrics")
+print('Accuracy of the classifier is ',metrics.accuracy_score(ytest,predicted))
+print('\n')
+print('Recall : ',metrics.recall_score(ytest,predicted), '\nPrecision : ',metrics.precision_score(ytest,predicted))
+print('\n')
+print('Confusion Matrix')
+print(metrics.confusion_matrix(ytest,predicted))

@@ -1,0 +1,52 @@
+import csv 
+with open('C://1DA20CS001//lab1//labb1.csv', 'r') as f:
+    reader = csv.reader(f)
+    data= list(reader)
+
+print("Training data\n") 
+for row in data:
+    print(row)
+print("--------------------------")
+
+attr_len=len(data[0])-1
+
+
+S=['0']*attr_len
+G=['?']*attr_len
+temp=[]
+
+
+print("The Hypothesis are\n")
+print("S=",S)
+print("G=",G)
+print("-------------------------")
+for row in data:
+    if row[-1]=='yes':
+        j=0
+        for col in row:
+            if col !='yes':
+                if col != S[j] and S[j] == '0':
+                    S[j] = col
+                elif col != S[j] and S[j] != "0":
+                    S[j]='?'
+            j=j+1
+            
+        for j in range(0,attr_len):
+            for k in temp:
+                if k[j] != S[j] and k[j] != "?":
+                    temp.remove(k)
+    if row[-1]=='no' :
+        j=0
+        for col in row:
+            if col != 'no':
+                if col!=S[j] and S[j] != '?':
+                    G[j]=S[j]
+                    temp.append(G)
+                    G=['?']*attr_len
+            j=j+1
+    print("S=",S)
+    if len(temp)==0:
+        print("G-",G)   
+    else:
+        print("G=",temp)
+    print('------------------------------------')
